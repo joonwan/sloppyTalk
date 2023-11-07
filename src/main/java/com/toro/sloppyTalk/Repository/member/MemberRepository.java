@@ -11,4 +11,6 @@ public interface MemberRepository {
 
     Member findById(Long memberId);
 
+    Member findByLoginId(String loginId);
+
 }

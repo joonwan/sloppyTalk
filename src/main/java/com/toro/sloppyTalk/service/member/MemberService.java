@@ -7,4 +7,6 @@ public interface MemberService {
     Long save(Member member);
 
     Member findMember(Long memberId);
+
+    Member findLoginMember(String loginId);
 }

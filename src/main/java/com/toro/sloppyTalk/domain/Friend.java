@@ -13,4 +13,5 @@ public class Friend {
     private Member member;
 
 
+
 }

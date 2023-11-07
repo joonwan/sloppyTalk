@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/sloppyTalk
+    username: sa
+    password: sa
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        default_batch_fetch_size: 100
+
+logging:
+  level:
+    org.hibernate.sql: trace
+server:
+  address: 0.0.0.0
+  port: 8080
+
+
+
