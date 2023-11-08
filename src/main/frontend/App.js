@@ -6,6 +6,7 @@ import FriendsScreen from "./FriendsScreen";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import ChattingScreen from "./ChattingScreen";
 import {Button} from "react-native";
+import PeopleScreen from "./PeopleScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -17,18 +18,19 @@ const  App = () =>{
        <Stack.Screen name="LoginScreen" component={LoginScreen}/>
        <Stack.Screen name="RegisterScreen" component={RegisterScreen}/>
        <Stack.Screen name="FriendsScreen" component={FriendsScreen}/>
+       <Stack.Screen name="PeopleScreen" component={PeopleScreen} />
        <Stack.Screen name="MyTabs" component={MyTabs} options={{headerShown:false}}/>
      </Stack.Navigator>
    </NavigationContainer>
   );
 }
 
-const MyTabs = () =>{
+const MyTabs = ({navigation}) =>{
     return (
         <Tab.Navigator>
             <Tab.Screen name="친구" component={FriendsScreen} options={{
                 headerRight:() => (
-                    <Button title="Search" onPress={() => console.log("click!!")} />
+                    <Button title="People" onPress={() => navigation.navigate("PeopleScreen")} />
                 )
             }}/>
             <Tab.Screen name="채팅" component={ChattingScreen}/>

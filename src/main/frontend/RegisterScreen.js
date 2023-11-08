@@ -27,15 +27,27 @@ const RegisterScreen = ({navigation}) => {
 
 
                     <Text style={styles.text}>Name</Text>
-                    <TextInput style={styles.input} onChangeText={onChangeName} value={name}/>
+                    <TextInput style={styles.input}
+                               onChangeText={onChangeName}
+                               value={name}
+                               autoCapitalize="none"
+                    />
 
 
                     <Text style={styles.text}>Id</Text>
-                    <TextInput style={styles.input} onChangeText={onChangeLoginId} value={loginId}/>
+                    <TextInput style={styles.input}
+                               onChangeText={onChangeLoginId}
+                               value={loginId}
+                               autoCapitalize="none"
+                    />
 
 
                     <Text style={styles.text}>Password</Text>
-                    <TextInput style={styles.input} onChangeText={onChangePassword} value={password}/>
+                    <TextInput style={styles.input}
+                               onChangeText={onChangePassword}
+                               value={password}
+                               autoCapitalize="none"
+                    />
 
 
             <Button title="register" onPress={() => {

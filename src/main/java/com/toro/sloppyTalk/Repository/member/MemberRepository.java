@@ -13,4 +13,5 @@ public interface MemberRepository {
 
     Member findByLoginId(String loginId);
 
+    List<Member> findAll(Long userId);
 }

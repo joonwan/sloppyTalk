@@ -73,11 +73,13 @@ const LoginScreen = ({navigation}) => {
             <TextInput style={styles.input}
                        onChangeText={onChangeLoginId}
                        value={loginId}
+                       autoCapitalize="none"
                        placeholder=" id"/>
 
             <TextInput style={styles.input}
                        onChangeText={onChangePassWord}
                        value={password}
+                       autoCapitalize="none"
                        placeholder=" password"/>
 
 
@@ -105,25 +107,6 @@ const LoginScreen = ({navigation}) => {
                 <View style={styles.buttonBox}>
                     <Button title="register" onPress={() => navigation.navigate("RegisterScreen")}/>
                 </View>
-
-                <View style={styles.buttonBox}>
-                    <Button title="clear store" onPress={async () => {
-                        console.log("===clear===");
-                        await clearStore();
-                        setSessionId(null);
-                        await getSessionId();
-                    }}/>
-                </View>
-
-
-                <View style={styles.buttonBox}>
-                    <Button title="findSessionIdFrom store" onPress={async () => {
-                        console.log('sessionId in the button= ' + sessionId);
-                        const result = await getSessionId();
-                        console.log(result + "!!!!!");
-                    }}/>
-                </View>
-
 
             </View>
 

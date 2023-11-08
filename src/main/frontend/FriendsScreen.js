@@ -1,4 +1,10 @@
-import {Text, View, StyleSheet} from "react-native";
+import {Text, View, StyleSheet, Button} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+async function getSessionId(){
+    const sessionId= await AsyncStorage.getItem("sessionId");
+    alert(sessionId);
+}
 
 const FriendsScreen = ({navigation}) =>{
     return (

@@ -32,4 +32,11 @@ public class MemberRepositoryV1 implements MemberRepository{
                 .getSingleResult();
     }
 
+    @Override
+    public List<Member> findAll(Long userId) {
+        return em.createQuery("select m from Member as m where m.id != :userId", Member.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
 }
