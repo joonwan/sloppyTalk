@@ -34,10 +34,23 @@ const PeopleScreen = () => {
 
     },[sessionId, data]);
 
-    const Item = ({memberName}) => (
+    const Item = ({memberName,memberId}) => (
         <View style={styles.member_container}>
             <Text style={styles.text}>{memberName}</Text>
-            <Button title="follow" onPress={() => alert("follow " + memberName)}/>
+            <Button title="follow" onPress={async () => {
+                const targetId = memberId;
+                const data = JSON.stringify({targetId})
+                alert(data);
+                await axios.post(`http://localhost:8080/members/${sessionId}/follow`,
+                    data,{
+                        headers:{
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+
+
+            }}/>
         </View>
     );
 
@@ -52,7 +65,7 @@ const PeopleScreen = () => {
                 }}/>
             </View>
             <FlatList data={data}
-                      renderItem={({item}) => <Item memberName={item.memberName}/>}
+                      renderItem={({item}) => <Item memberName={item.memberName} memberId={item.memberId}/>}
                       keyExtractor={item => item.memberid}
             />
         </SafeAreaView>

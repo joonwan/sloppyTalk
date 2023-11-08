@@ -13,4 +13,7 @@ public interface MemberService {
     Member findLoginMember(String loginId);
 
     List<Member> findMembers(Long userId);
+
+    Long follow(Long memberId, Long targetId);
+
 }

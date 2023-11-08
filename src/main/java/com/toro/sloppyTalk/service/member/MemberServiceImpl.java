@@ -1,6 +1,8 @@
 package com.toro.sloppyTalk.service.member;
 
+import com.toro.sloppyTalk.Repository.friend.FriendRepository;
 import com.toro.sloppyTalk.Repository.member.MemberRepository;
+import com.toro.sloppyTalk.domain.Friend;
 import com.toro.sloppyTalk.domain.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +18,11 @@ import java.util.List;
 public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
+    private final FriendRepository friendRepository;
 
-    @Transactional(readOnly = false)
+
     @Override
+    @Transactional(readOnly = false)
     public Long save(Member member) {
         return memberRepository.save(member);
     }
@@ -37,5 +41,16 @@ public class MemberServiceImpl implements MemberService{
     @Override
     public List<Member> findMembers(Long userId) {
         return memberRepository.findAll(userId);
+    }
+
+
+    @Override
+    @Transactional(readOnly = false)
+    public Long follow(Long memberId, Long targetId) {
+        Member member = memberRepository.findById(memberId);
+        Member target = memberRepository.findById(targetId);
+        Friend friend = new Friend(member, target);
+        Long friendId = friendRepository.save(friend);
+        return friendId;
     }
 }

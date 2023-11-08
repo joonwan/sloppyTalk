@@ -1,8 +1,10 @@
 package com.toro.sloppyTalk.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class Friend {
 
     @Id @GeneratedValue
@@ -16,6 +18,11 @@ public class Friend {
     @JoinColumn(name = "friend_id")
     private Member other;
 
+    public Friend() {
+    }
 
-
+    public Friend(Member me, Member other) {
+        this.me = me;
+        this.other = other;
+    }
 }
