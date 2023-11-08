@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -39,8 +40,24 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
-    public List<Member> findMembers(Long userId) {
-        return memberRepository.findAll(userId);
+    public List<Member> findMembers(Long memberId){
+        List<Long> friendIds = new ArrayList<>();
+        List<Member> result = new ArrayList<>();
+        List<Member> findMembers = memberRepository.findAll(memberId);
+        List<Friend> friends = findMember(memberId).getFriends();
+
+        for (Friend friend : friends) {
+            friendIds.add(friend.getOther().getId());
+        }
+
+        for(Member findMember : findMembers){
+            Long findMemberId = findMember.getId();
+            if(!(friendIds.contains(findMemberId))){
+                result.add(findMember);
+            }
+        }
+
+        return result;
     }
 
 
