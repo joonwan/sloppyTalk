@@ -49,8 +49,15 @@ public class MemberServiceImpl implements MemberService{
     public Long follow(Long memberId, Long targetId) {
         Member member = memberRepository.findById(memberId);
         Member target = memberRepository.findById(targetId);
+
+
         Friend friend = new Friend(member, target);
-        Long friendId = friendRepository.save(friend);
-        return friendId;
+        return friendRepository.save(friend);
+    }
+
+    @Override
+    public List<Friend> findFriends(Long memberId) {
+        Member member = memberRepository.findById(memberId);
+        return friendRepository.findFriends(member);
     }
 }

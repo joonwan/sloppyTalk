@@ -1,5 +1,6 @@
 package com.toro.sloppyTalk.service.member;
 
+import com.toro.sloppyTalk.domain.Friend;
 import com.toro.sloppyTalk.domain.Member;
 
 import java.util.List;
@@ -16,4 +17,5 @@ public interface MemberService {
 
     Long follow(Long memberId, Long targetId);
 
+    List<Friend> findFriends(Long memberId);
 }

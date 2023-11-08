@@ -43,11 +43,17 @@ public class MemberController {
     public String follow(@PathVariable String sessionId, @RequestBody FollowRequestDto dto){
 
         Long memberId = sessionManager.getMemberId(sessionId);
-        log.info(" member id : {}",memberId);
         Long targetId = dto.getTargetId();
-        log.info(" target id : {}",targetId );
         memberService.follow(memberId,targetId);
         return "ok";
+    }
+
+    @GetMapping("/{sessionId}/friends")
+    public List<FriendsResponseDto> getFriends(@PathVariable String sessionId){
+        Long memberId = sessionManager.getMemberId(sessionId);
+        List<Friend> friends = memberService.findFriends(memberId);
+
+        return friends.stream().map(FriendsResponseDto::new).collect(Collectors.toList());
     }
 
 
@@ -57,6 +63,19 @@ public class MemberController {
         String password = param.getPassword();
 
         return new Member(name,loginId,password);
+    }
+
+    @Data
+    static class FriendsResponseDto{
+
+        private Long friendId;
+        private String friendName;
+
+        public FriendsResponseDto(Friend friend) {
+
+            this.friendId = friend.getId();
+            this.friendName = friend.getOther().getName();
+        }
     }
 
     @Data
