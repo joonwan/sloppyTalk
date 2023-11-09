@@ -41,7 +41,17 @@ const FriendsScreen = ({navigation}) =>{
     const Item = ({friendId,friendName}) => (
         <View style={styles.member_container}>
             <Text style={styles.text}>{friendName}</Text>
-            <Button title="chat" onPress={() => console.log("chat !!")}/>
+            <Button title="chat" onPress={
+                () => {
+                    console.log(friendId);
+                    console.log(friendName);
+                    navigation.navigate("ChatScreen", {
+                        friendName: friendName,
+                        friendId: friendId
+                    })
+                }
+            }
+            />
         </View>
     )
     return (
