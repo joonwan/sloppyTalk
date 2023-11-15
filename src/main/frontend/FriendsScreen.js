@@ -60,6 +60,30 @@ const FriendsScreen = ({navigation}) =>{
                       renderItem={({item}) => <Item friendId={item.friendId} friendName={item.friendName}/>}
                       keyExtractor={item => item.friendId}
             />
+            <Button title="async" onPress={() => {
+                async function setting(){
+                    return await getSessionId();
+                }
+                const promise = setting();
+
+                promise.then(async (value) =>
+                    {
+                        try{
+                            const result= await axios.get(`http://localhost:8080/members/${value}/friends`,
+                                {
+                                    headers:{
+                                        'Content-Type': 'application/json'
+                                    }
+                                }
+                            );
+                            setData(result.data);
+                        }catch(e){
+                            console.log("axios error : " + e);
+                        }
+
+                    }
+                );
+            }}/>
         </SafeAreaView>
     )
 }

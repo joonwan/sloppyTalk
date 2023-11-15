@@ -17,7 +17,7 @@ async function getSessionId(){
     const sessionId = await AsyncStorage.getItem("sessionId");
     return sessionId;
 }
-const PeopleScreen = () => {
+const PeopleScreen = ({navigation}) => {
 
     const [data, setData] = useState([]);
     const [sessionId, setSessionId] = useState("");
@@ -40,7 +40,7 @@ const PeopleScreen = () => {
             <Button title="follow" onPress={async () => {
                 const targetId = memberId;
                 const data = JSON.stringify({targetId})
-                alert(data);
+                alert("follow!!");
                 await axios.post(`http://localhost:8080/members/${sessionId}/follow`,
                     data,{
                         headers:{
@@ -49,7 +49,7 @@ const PeopleScreen = () => {
                     });
 
 
-
+                navigation.goBack();
             }}/>
         </View>
     );
