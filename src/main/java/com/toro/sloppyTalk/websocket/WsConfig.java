@@ -13,7 +13,9 @@ public class WsConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/sloppy-gate")
-                .setAllowedOrigins("*");
+                .setAllowedOrigins("http://localhost:19006")
+                .withSockJS()
+        ;
     }
 
     @Override

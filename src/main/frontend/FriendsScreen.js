@@ -2,15 +2,16 @@ import {Button, FlatList, SafeAreaView, StyleSheet, Text, View} from "react-nati
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
+import IP_ADDRESS from "./Const";
 
 async function getSessionId(){
     return await AsyncStorage.getItem("sessionId");
 }
 
-const FriendsScreen = ({navigation}) =>{
+const FriendsScreen = ({route,navigation}) =>{
 
     const [data, setData] = useState([]);
-    const [sessionId, setSessionId] = useState("");
+    const memberId = route.params;
 
     useEffect(() =>{
         async function setting(){
@@ -21,7 +22,7 @@ const FriendsScreen = ({navigation}) =>{
         promise.then(async (value) =>
             {
                try{
-                   const result= await axios.get(`http://localhost:8080/members/${value}/friends`,
+                   const result= await axios.get(`http://${IP_ADDRESS}:8080/members/${value}/friends`,
                        {
                            headers:{
                                'Content-Type': 'application/json'
@@ -47,7 +48,8 @@ const FriendsScreen = ({navigation}) =>{
                     console.log(friendName);
                     navigation.navigate("ChatScreen", {
                         friendName: friendName,
-                        friendId: friendId
+                        friendId: friendId,
+                        memberData : memberId
                     })
                 }
             }
@@ -69,7 +71,7 @@ const FriendsScreen = ({navigation}) =>{
                 promise.then(async (value) =>
                     {
                         try{
-                            const result= await axios.get(`http://localhost:8080/members/${value}/friends`,
+                            const result= await axios.get(`http://${IP_ADDRESS}:8080/members/${value}/friends`,
                                 {
                                     headers:{
                                         'Content-Type': 'application/json'

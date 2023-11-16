@@ -1,12 +1,13 @@
 import {View, StyleSheet, TextInput, Button, Text} from "react-native";
 import {useState} from "react";
 import axios from "axios";
+import IP_ADDRESS from "./Const";
 
 function register({name, loginId, password}){
     const data = JSON.stringify({name,loginId,password});
 
     axios.post(
-        "http://localhost:8080/members/new",
+        `http://${IP_ADDRESS}:8080/members/new`,
         data,
         {
             headers:{

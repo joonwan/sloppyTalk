@@ -1,0 +1,76 @@
+package com.toro.sloppyTalk.service.message;
+
+import com.toro.sloppyTalk.domain.ChatRoom;
+import com.toro.sloppyTalk.domain.Member;
+import com.toro.sloppyTalk.domain.Message;
+import com.toro.sloppyTalk.service.chatroom.ChatRoomService;
+import com.toro.sloppyTalk.service.member.MemberService;
+import jakarta.persistence.EntityManager;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(SpringExtension.class)
+@Transactional
+@SpringBootTest
+class MessageServiceTest {
+
+
+    @Autowired
+    MemberService memberService;
+
+    @Autowired
+    MessageService messageService;
+
+    @Autowired
+    ChatRoomService chatRoomService;
+
+    @Autowired
+    EntityManager em;
+
+
+    @Test
+    @Commit
+    public void messageServiceTest() throws Exception {
+        //given
+
+        Member member1 = new Member("test1","test1","test1");
+        Member member2 = new Member("test2","test2","test2");
+        List<Member> members = Arrays.asList(member1,member2);
+
+        memberService.save(member1);
+        memberService.save(member2);
+
+
+        Long chatRoomId = chatRoomService.createChatRoom(members);
+
+        em.flush();
+        em.clear();
+
+        ChatRoom chatRoom = chatRoomService.findChatRoom(chatRoomId);
+
+        //when
+        Message message1 = new Message(chatRoom,member1,"new Test Message1",LocalDateTime.now());
+        Message message2 = new Message(chatRoom,member1,"new Test Message2",LocalDateTime.now());
+        messageService.save(message1);
+        messageService.save(message2);
+
+        //then
+
+        List<Message> messages = messageService.findMessageByChatRoomId(chatRoomId);
+        Assertions.assertThat(messages.size()).isEqualTo(2);
+
+
+    }
+}

@@ -20,6 +20,11 @@ public class Member {
     @OneToMany(mappedBy = "me")
     private List<Friend> friends = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member")
+    private List<MemberChatRoom> memberChatRooms = new ArrayList<>();
+
+
+
     public Member() {
     }
 

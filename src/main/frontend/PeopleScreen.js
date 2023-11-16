@@ -2,11 +2,12 @@ import {Text, View, StyleSheet, Button, FlatList, SafeAreaView} from "react-nati
 import React, {useEffect, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import IP_ADDRESS from "./Const";
 
 async function findPeople(sessionId){
 
     try{
-        return await axios.get("http://localhost:8080/members/" + sessionId);
+        return await axios.get(`http://${IP_ADDRESS}:8080/members/` + sessionId);
 
     }catch(e){
         console.log("axios error : " + e);
@@ -41,14 +42,12 @@ const PeopleScreen = ({navigation}) => {
                 const targetId = memberId;
                 const data = JSON.stringify({targetId})
                 alert("follow!!");
-                await axios.post(`http://localhost:8080/members/${sessionId}/follow`,
+                await axios.post(`http://${IP_ADDRESS}:8080/members/${sessionId}/follow`,
                     data,{
                         headers:{
                             'Content-Type': 'application/json'
                         }
                     });
-
-
                 navigation.goBack();
             }}/>
         </View>

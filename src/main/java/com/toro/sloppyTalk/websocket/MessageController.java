@@ -14,7 +14,7 @@ public class MessageController {
     @MessageMapping("/global")
     @SendTo("/topic/global")
     public ResponseMessage getGlobalMessage(Message message){
-        return new ResponseMessage(
+        return new ResponseMessage(message.getFromId(), message.getToId(),
                 "global message : " + HtmlUtils.htmlEscape(message.getContent()));
     }
 

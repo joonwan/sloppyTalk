@@ -1,49 +1,98 @@
 import {Button, FlatList, StyleSheet, Text, TextInput, View} from "react-native";
 import {useEffect, useState} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import SockJs from "sockjs-client"
+import Stomp from "stompjs"
+import IP_ADDRESS from "./Const";
 
-const getSessionId = async () =>{
-    return await AsyncStorage.getItem("sessionId");
+var stompClient = null;
+
+
+const getChatRoomId = (memberData) => {
+
+    const memberId = memberData.memberId;
+    if(memberId === 3){
+        return 2;
+    }
+    return 1;
 }
 
+
 const ChatScreen = ({route},navigation) =>{
-    const {friendName,friendId} = route.params;
-    const [sessionId, setSessionId] = useState("");
-    const data = [
-        {id : 1, value : "a", sessionId : "asd"},
-        {id : 2, value : "b",sessionId : "asd"},
-        {id : 3, value : "c",sessionId : "asd"},
-        {id : 4, value : "dasfdoiqnwfoqejfenqofvjqenfqeojqencojqnfqjqeojfqnefq",sessionId : "asd"},
+    const {friendName,friendId,memberData} = route.params;
+
+    let data = [
+        {id : 1, fromId : 1, content : "hello!!"},
+        {id : 2, fromId : 2, content : "hello my friend!!"},
+        {id : 3, fromId : 2, content : "What are you doing?"},
+        {id : 4, fromId : 1, content : "Shut up"},
     ];
 
     const [text, onChangeText] = useState("");
-    const [id, setId] = useState(5);
     const [initData, setInitData] = useState(data);
 
-    const addElement = ({id,text}) =>{
-        let newArray = [...initData, {id:id,value:text,sessionId:sessionId}];
-        setInitData(newArray);
+    const connect = (memberData) => {
+        const sock = new SockJs(`http://${IP_ADDRESS}:8080/sloppy-gate`);
+        stompClient = Stomp.over(sock);
+        stompClient.connect({},
+            frame => {
+                const chatRoomId= getChatRoomId(memberData);
+                console.log(chatRoomId)
+
+                stompClient.subscribe(
+                    "/topic/global",
+                    (message) => {
+
+                        console.log("message : " + JSON.stringify(message.body));
+                        const messageData = JSON.parse(message.body);
+                        // const id = initData.length+1;
+                        // console.log("flat list : " + id);
+                        // addElement({id,messageData});
+
+
+                    }
+                )
+            })
     }
 
-    useEffect(() =>{
-        const promise = getSessionId();
-        promise.then(value => setSessionId(value));
+
+
+    const addElement = ({id,messageData}) =>{
+        const fromId = messageData.fromId;
+        const content = messageData.content;
+        console.log(fromId);
+        console.log(content);
+
+        const newArray = [...initData, {id:id,fromId:fromId,content:content}];
+        console.log(newArray);
+        setInitData(newArray);
+
+    }
+
+    // const addElement = ({id,text}) =>{
+    //     let newArray = [...initData, {id:id,fromId:2,content:text}];
+    //     setInitData(newArray);
+    // }
+    useEffect(() => {
+        console.log(JSON.stringify(initData));
     },[initData])
-    const Content = ({text,param_sessionId}) => (
+    useEffect(() => {
+        connect(memberData);
+    },[])
+    const Content = ({fromId,content}) => (
         <View style={styles.message_container}>
 
-            {param_sessionId === sessionId ?
+            {fromId === memberData.memberId ?
                 <View style={styles.my_message_box}>
                     <Text style={styles.name} >me</Text>
                     <View style={styles.content_box}>
-                        <Text style={styles.content}>{text}</Text>
+                        <Text style={styles.content}>{content}</Text>
                     </View>
                 </View>
                 :
                 <View style={styles.other_message_box}>
                     <Text style={styles.name}>{friendName}</Text>
                     <View style={styles.content_box}>
-                        <Text style={styles.content}>{text}</Text>
+                        <Text style={styles.content}>{content}</Text>
                     </View>
 
                 </View>
@@ -57,8 +106,9 @@ const ChatScreen = ({route},navigation) =>{
             <View style={styles.chat_container}>
                 <FlatList
                     data={initData}
-                    renderItem={({item}) => <Content text={item.value} param_sessionId={item.sessionId}/>}
+                    renderItem={({item}) => <Content fromId={item.fromId} content={item.content}/>}
                     keyExtractor={item => item.id}
+                    extraData={initData}
                 />
             </View>
 
@@ -69,9 +119,13 @@ const ChatScreen = ({route},navigation) =>{
                 </View>
                <View style={styles.button}>
                    <Button title="send" onPress={() => {
-                       addElement({id, text});
-                       setId(id+1);
-                       onChangeText("");
+
+                        stompClient.send("/ws/global",{}, JSON.stringify({
+                            fromId : memberData.memberId,
+                            toId : friendId,
+                            content : text
+                        })
+                        )
                    }}/>
                </View>
 

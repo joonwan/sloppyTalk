@@ -7,7 +7,6 @@ import com.toro.sloppyTalk.service.member.MemberService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
-@CrossOrigin(origins = "http://localhost:19006")
 public class MemberController {
 
     private final MemberService memberService;
@@ -73,7 +71,7 @@ public class MemberController {
 
         public FriendsResponseDto(Friend friend) {
 
-            this.friendId = friend.getId();
+            this.friendId = friend.getOther().getId();
             this.friendName = friend.getOther().getName();
         }
     }

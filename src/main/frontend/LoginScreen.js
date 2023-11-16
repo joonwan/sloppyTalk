@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {StyleSheet, View, Text, TextInput, Button} from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import IP_ADDRESS from "./Const";
 
 
 const storeSessionId = async (sessionId) => {
@@ -37,9 +38,6 @@ const LoginScreen = ({navigation}) => {
     const [loginId, onChangeLoginId] = useState("");
     const [password, onChangePassWord] = useState("");
     const [sessionId, setSessionId] = useState(null);
-    const [isLogin, setIsLogin] = useState(false);
-
-
     useEffect(() => {
         clearStore();
     }, [])
@@ -50,7 +48,7 @@ const LoginScreen = ({navigation}) => {
 
 
         const json = await axios.post(
-            "http://localhost:8080/login",
+            `http://${IP_ADDRESS}:8080/login`,
             data,
             {
                 headers: {
@@ -59,11 +57,11 @@ const LoginScreen = ({navigation}) => {
             }
         );
 
-        const receiveJson = await json.data;
+        const receiveMemberId = await json.data.memberId;
         const receiveSessionId = await json.data.sessionId;
         const receiveIsLogin = await json.data.login;
 
-        return [receiveIsLogin, receiveSessionId];
+        return [receiveIsLogin, receiveSessionId, receiveMemberId];
 
 
     }
@@ -88,12 +86,17 @@ const LoginScreen = ({navigation}) => {
                     <Button title="login" onPress={async () => {
                         console.log("====login=====")
                         try {
-                            const [rIsLogin, rSessionId] = await login({loginId, password, sessionId});
-                            console.log("test : " + rIsLogin + ", " + rSessionId);
+                            const [rIsLogin, rSessionId, rMemberId] = await login({loginId, password, sessionId});
+
                             await storeSessionId(rSessionId);
                             if (rIsLogin) {
                                 setSessionId(rSessionId);
-                                navigation.navigate("MyTabs");
+                                navigation.navigate("MyTabs",{
+                                    screen:"친구",
+                                    params:{
+                                        memberId : rMemberId
+                                    }
+                                });
                             }
 
                         } catch (e) {

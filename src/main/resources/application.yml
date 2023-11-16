@@ -16,7 +16,7 @@ logging:
   level:
     org.hibernate.sql: trace
 server:
-  address: 0.0.0.0
+  address: 192.168.45.23
   port: 8080
 
 
