@@ -30,4 +30,21 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository{
                 .setParameter("memberId", memberId)
                 .getResultList();
     }
+
+    @Override
+    public ExistDto alreadyExist(Long memberId, Long friendId){
+
+        List<Long> resultList = em.createQuery("select mcr.chatRoom.id from MemberChatRoom mcr " +
+                        "where mcr.member.id in (:memberId, : friendId) group by mcr.chatRoom.id having count (distinct mcr.member) = 2", Long.class)
+                .setParameter("memberId", memberId)
+                .setParameter("friendId", friendId)
+                .getResultList();
+
+        if(resultList.size() == 1){
+            return new ExistDto(resultList.get(0),true);
+        }
+
+        return new ExistDto(null,false);
+
+    }
 }

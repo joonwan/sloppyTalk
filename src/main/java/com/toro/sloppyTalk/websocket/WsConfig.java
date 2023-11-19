@@ -20,7 +20,7 @@ public class WsConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic");
+        registry.enableSimpleBroker("/topic", "/chat_room");
         registry.setApplicationDestinationPrefixes("/ws");
     }
 }

@@ -11,4 +11,6 @@ public interface MemberChatRoomRepository {
     MemberChatRoom findById(Long memberChatRoomId);
 
     List<MemberChatRoom> findMemberChatRooms(Long memberId);
+
+    ExistDto alreadyExist(Long memberId, Long friendId);
 }

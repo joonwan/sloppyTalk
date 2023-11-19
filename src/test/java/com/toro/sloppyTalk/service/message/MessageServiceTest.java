@@ -47,13 +47,19 @@ class MessageServiceTest {
 
         Member member1 = new Member("test1","test1","test1");
         Member member2 = new Member("test2","test2","test2");
-        List<Member> members = Arrays.asList(member1,member2);
+
+        Long member1Id = memberService.save(member1);
+        Long member2Id = memberService.save(member2);
 
         memberService.save(member1);
         memberService.save(member2);
 
+        em.flush();
+        em.clear();
 
-        Long chatRoomId = chatRoomService.createChatRoom(members);
+        List<Long> participantIdList = Arrays.asList(member1Id, member2Id);
+
+        Long chatRoomId = chatRoomService.createChatRoom(participantIdList);
 
         em.flush();
         em.clear();
@@ -63,8 +69,9 @@ class MessageServiceTest {
         //when
         Message message1 = new Message(chatRoom,member1,"new Test Message1",LocalDateTime.now());
         Message message2 = new Message(chatRoom,member1,"new Test Message2",LocalDateTime.now());
-        messageService.save(message1);
-        messageService.save(message2);
+
+        em.persist(message1);
+        em.persist(message2);
 
         //then
 

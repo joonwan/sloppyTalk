@@ -8,10 +8,36 @@ async function getSessionId(){
     return await AsyncStorage.getItem("sessionId");
 }
 
-const FriendsScreen = ({route,navigation}) =>{
 
+
+const FriendsScreen = ({route,navigation}) =>{
+    const [chatRoomId, setChatRoomId] = useState(null);
     const [data, setData] = useState([]);
-    const memberId = route.params;
+    const idParam = route.params;
+    const memberId = idParam.memberId;
+
+    async function createChatRoom(memberId, friendId, friendName) {
+        console.log("memberId : " + memberId+ ", friendId : " + friendId);
+        await axios.post(`http://${IP_ADDRESS}:8080/chatroom/new`,
+            JSON.stringify({
+                memberId,
+                friendId
+            }),{
+                headers:{
+                    "content-type" : "Application/Json"
+                }
+            }
+        ).then(value => {
+
+            const chatRoomId = value.data.chatRoomId;
+            navigation.navigate("ChatScreen", {
+                friendName: friendName,
+                friendId: friendId,
+                memberId : memberId,
+                chatRoomId : chatRoomId,
+            })
+        });
+    }
 
     useEffect(() =>{
         async function setting(){
@@ -38,19 +64,13 @@ const FriendsScreen = ({route,navigation}) =>{
         );
 
     },[]);
-
+    useEffect(() => {},[chatRoomId]);
     const Item = ({friendId,friendName}) => (
         <View style={styles.member_container}>
             <Text style={styles.text}>{friendName}</Text>
             <Button title="chat" onPress={
                 () => {
-                    console.log(friendId);
-                    console.log(friendName);
-                    navigation.navigate("ChatScreen", {
-                        friendName: friendName,
-                        friendId: friendId,
-                        memberData : memberId
-                    })
+                    createChatRoom(memberId, friendId,friendName);
                 }
             }
             />

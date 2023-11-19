@@ -1,206 +1,146 @@
-import {Button, FlatList, StyleSheet, Text, TextInput, View} from "react-native";
-import {useEffect, useState} from "react";
-import SockJs from "sockjs-client"
-import Stomp from "stompjs"
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
 import IP_ADDRESS from "./Const";
 
-var stompClient = null;
-
-
-const getChatRoomId = (memberData) => {
-
-    const memberId = memberData.memberId;
-    if(memberId === 3){
-        return 2;
-    }
-    return 1;
-}
-
-
-const ChatScreen = ({route},navigation) =>{
-    const {friendName,friendId,memberData} = route.params;
-
-    let data = [
-        {id : 1, fromId : 1, content : "hello!!"},
-        {id : 2, fromId : 2, content : "hello my friend!!"},
-        {id : 3, fromId : 2, content : "What are you doing?"},
-        {id : 4, fromId : 1, content : "Shut up"},
-    ];
+const ChatScreen = ({ route }) => {
+    const { friendName, friendId, memberId, chatRoomId } = route.params;
 
     const [text, onChangeText] = useState("");
-    const [initData, setInitData] = useState(data);
+    const [messages, setMessages] = useState([]);
+    const stompClient = useRef(null);
+    const nextId = useRef(1);
 
-    const connect = (memberData) => {
-        const sock = new SockJs(`http://${IP_ADDRESS}:8080/sloppy-gate`);
-        stompClient = Stomp.over(sock);
-        stompClient.connect({},
-            frame => {
-                const chatRoomId= getChatRoomId(memberData);
-                console.log(chatRoomId)
+    useEffect(() => {
+        const connect = () => {
+            const sock = new SockJS(`http://${IP_ADDRESS}:8080/sloppy-gate`);
+            stompClient.current = Stomp.over(sock);
 
-                stompClient.subscribe(
-                    "/topic/global",
+            stompClient.current.connect({}, frame => {
+                console.log("Connected: " + frame);
+
+                stompClient.current.subscribe(
+                    `/chat_room/${chatRoomId}`,
                     (message) => {
-
-                        console.log("message : " + JSON.stringify(message.body));
-                        const messageData = JSON.parse(message.body);
-                        // const id = initData.length+1;
-                        // console.log("flat list : " + id);
-                        // addElement({id,messageData});
-
-
+                        const json = JSON.parse(message.body);
+                        setMessages(prevMessages => [...prevMessages, { id: nextId.current, fromId: json.fromId, content: json.content }]);
+                        nextId.current += 1;
                     }
-                )
-            })
-    }
+                );
+            }, error => {
+                console.log("Error: " + error);
+            });
+        };
 
+        connect();
 
-
-    const addElement = ({id,messageData}) =>{
-        const fromId = messageData.fromId;
-        const content = messageData.content;
-        console.log(fromId);
-        console.log(content);
-
-        const newArray = [...initData, {id:id,fromId:fromId,content:content}];
-        console.log(newArray);
-        setInitData(newArray);
-
-    }
-
-    // const addElement = ({id,text}) =>{
-    //     let newArray = [...initData, {id:id,fromId:2,content:text}];
-    //     setInitData(newArray);
-    // }
-    useEffect(() => {
-        console.log(JSON.stringify(initData));
-    },[initData])
-    useEffect(() => {
-        connect(memberData);
-    },[])
-    const Content = ({fromId,content}) => (
-        <View style={styles.message_container}>
-
-            {fromId === memberData.memberId ?
-                <View style={styles.my_message_box}>
-                    <Text style={styles.name} >me</Text>
-                    <View style={styles.content_box}>
-                        <Text style={styles.content}>{content}</Text>
-                    </View>
-                </View>
-                :
-                <View style={styles.other_message_box}>
-                    <Text style={styles.name}>{friendName}</Text>
-                    <View style={styles.content_box}>
-                        <Text style={styles.content}>{content}</Text>
-                    </View>
-
-                </View>
+        return () => {
+            // Disconnect WebSocket when the component is unmounted
+            if (stompClient.current && stompClient.current.connected) {
+                stompClient.current.disconnect();
             }
-        </View>
+        };
+    }, [chatRoomId]);
 
-    )
+    const sendMessage = () => {
+        if (text.trim() !== "" && stompClient.current && stompClient.current.connected) {
+            stompClient.current.send("/ws/private", {}, JSON.stringify({
+                fromId: memberId,
+                toId: friendId,
+                content: text,
+                chatRoomId: chatRoomId
+            }));
+            onChangeText("");
+        }
+    };
+
+    const MessageComponent = ({ fromId, content }) => (
+        <View style={fromId === memberId ? styles.myMessageBox : styles.otherMessageBox}>
+            <Text style={styles.name}>{fromId === memberId ? 'Me' : friendName}</Text>
+            <View style={styles.contentBox}>
+                <Text style={styles.content}>{content}</Text>
+            </View>
+        </View>
+    );
 
     return (
         <View style={styles.container}>
-            <View style={styles.chat_container}>
+            <View style={styles.chatContainer}>
                 <FlatList
-                    data={initData}
-                    renderItem={({item}) => <Content fromId={item.fromId} content={item.content}/>}
-                    keyExtractor={item => item.id}
-                    extraData={initData}
+                    data={messages}
+                    renderItem={({ item }) => <MessageComponent fromId={item.fromId} content={item.content} />}
+                    keyExtractor={(item) => item.id}
                 />
             </View>
 
-
-            <View style={styles.input_container}>
-                <View  style={styles.input_box}>
-                    <TextInput value={text} onChangeText={onChangeText} style={styles.t_input} />
+            <View style={styles.inputContainer}>
+                <View style={styles.inputBox}>
+                    <TextInput value={text} onChangeText={onChangeText} style={styles.textInput} />
                 </View>
-               <View style={styles.button}>
-                   <Button title="send" onPress={() => {
-
-                        stompClient.send("/ws/global",{}, JSON.stringify({
-                            fromId : memberData.memberId,
-                            toId : friendId,
-                            content : text
-                        })
-                        )
-                   }}/>
-               </View>
-
+                <View style={styles.button}>
+                    <Button title="Send" onPress={sendMessage} />
+                </View>
             </View>
-    </View>
-)
-
-
-}
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
-    container : {
-        flex : 1,
-        justifyContent : "center"
+    container: {
+        flex: 1,
+        justifyContent: "center"
     },
-    chat_container : {
-        flex:7,
-
+    chatContainer: {
+        flex: 7,
     },
-    input_container:{
-        flex:1,
-        borderWidth:1,
-        flexDirection : "row",
-        alignItems:"center",
-
-
+    inputContainer: {
+        flex: 1,
+        borderWidth: 1,
+        flexDirection: "row",
+        alignItems: "center",
     },
-    input_box : {
-        flex : 4,
-        justifyContent:"center",
-
-
+    inputBox: {
+        flex: 4,
+        justifyContent: "center",
     },
-    button : {
-        flex : 1,
-        marginHorizontal:4,
-
+    button: {
+        flex: 1,
+        marginHorizontal: 4,
     },
-    t_input : {
-        borderWidth : 1,
-        borderRadius : 10,
-        height:35,
-        marginHorizontal:4,
-
+    textInput: {
+        borderWidth: 1,
+        borderRadius: 10,
+        height: 35,
+        marginHorizontal: 4,
     },
-    my_message_box:{
-        margin : 4,
-        justifyContent:"center",
-        alignItems:"flex-end",
-        padding:10
+    myMessageBox: {
+        margin: 4,
+        justifyContent: "center",
+        alignItems: "flex-end",
+        padding: 10
     },
-    other_message_box:{
-        margin : 4,
-        borderRadius :10,
-        justifyContent:"center",
-        alignItems:"flex-start",
-        padding:10
+    otherMessageBox: {
+        margin: 4,
+        borderRadius: 10,
+        justifyContent: "center",
+        alignItems: "flex-start",
+        padding: 10
     },
-    message_container:{
-        margin:3
+    contentBox: {
+        borderWidth: 1,
+        margin: 10,
+        borderRadius: 15,
+        minHeight: 20,
+        padding: 10,
+        maxWidth: 200
     },
-    name : {
-        fontSize:12
+    name: {
+        fontSize: 12
     },
-    content:{
-        fontSize:20
+    content: {
+        fontSize: 20
     },
-    content_box : {
-        borderWidth:1,
-        margin :10,
-        borderRadius:15,
-        minHeight:20,
-        padding:10,
-        maxWidth:200
-    }
-})
+});
 
 export default ChatScreen;
