@@ -3,6 +3,7 @@ import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-nativ
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import IP_ADDRESS from "./Const";
+import axios from "axios";
 
 const ChatScreen = ({ route }) => {
     const { friendName, friendId, memberId, chatRoomId } = route.params;
@@ -10,10 +11,30 @@ const ChatScreen = ({ route }) => {
     const [text, onChangeText] = useState("");
     const [messages, setMessages] = useState([]);
     const stompClient = useRef(null);
-    const nextId = useRef(1);
+    const nextId = useRef(0);
 
     useEffect(() => {
         const connect = () => {
+
+            axios.get(
+                `http://${IP_ADDRESS}:8080/chatroom/${chatRoomId}/messages`,
+                {
+                    headers:{
+                        "content-type" : "Application/Json"
+                    }
+                }
+            ).then(
+                response => {
+                    console.log(response.data);
+                    setMessages(response.data.messageDataList);
+                    nextId.current = response.data.startId;
+
+
+                }
+            ).catch(
+                e => console.log("axios error : " + e)
+            )
+
             const sock = new SockJS(`http://${IP_ADDRESS}:8080/sloppy-gate`);
             stompClient.current = Stomp.over(sock);
 
