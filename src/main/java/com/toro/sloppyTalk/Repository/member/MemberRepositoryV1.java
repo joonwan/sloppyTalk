@@ -39,4 +39,6 @@ public class MemberRepositoryV1 implements MemberRepository{
                 .getResultList();
     }
 
+
+
 }

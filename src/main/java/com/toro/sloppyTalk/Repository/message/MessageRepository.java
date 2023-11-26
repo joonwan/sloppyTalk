@@ -9,4 +9,6 @@ public interface MessageRepository {
     Long save(Message message);
 
     List<Message> findMessages(Long chatRoomId);
+
+    String findLastMessage(Long chatRoomId);
 }

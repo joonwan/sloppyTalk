@@ -11,4 +11,6 @@ public interface MessageService {
     Long save(MessageDto messageDto);
 
     List<Message> findMessageByChatRoomId(Long chatRoomId);
+
+    String getLastMessage(Long chatRoomId);
 }

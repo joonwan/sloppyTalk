@@ -14,13 +14,12 @@ const storeSessionId = async (sessionId) => {
     }
 }
 
-const getSessionId = async () => {
+const storeMemberId = async (memberId) => {
     try {
-        const sessionId = await AsyncStorage.getItem("sessionId");
-        console.log("find : " + sessionId);
-        return sessionId;
+        console.log("store : " + memberId);
+        await AsyncStorage.setItem("memberId", memberId);
     } catch (e) {
-        console.log("async storage get data error : " + e);
+        console.log("async storage store data error : " + e);
     }
 }
 
@@ -40,6 +39,7 @@ const LoginScreen = ({navigation}) => {
     const [sessionId, setSessionId] = useState(null);
     useEffect(() => {
         clearStore();
+
     }, [])
 
     async function login({loginId, password, sessionId}) {
@@ -89,14 +89,17 @@ const LoginScreen = ({navigation}) => {
                             const [rIsLogin, rSessionId, rMemberId] = await login({loginId, password, sessionId});
 
                             await storeSessionId(rSessionId);
+                            await storeMemberId(rMemberId.toString());
                             if (rIsLogin) {
                                 setSessionId(rSessionId);
-                                navigation.navigate("MyTabs",{
-                                    screen:"친구",
-                                    params:{
-                                        memberId : rMemberId
-                                    }
-                                });
+                                navigation.navigate("MyTabs", {
+                                        screen: "친구",
+                                        params: {
+                                            memberId: rMemberId,
+                                            // 다른 필요한 매개변수들을 여기에 추가
+                                        },
+                                    },
+                                 );
                             }
 
                         } catch (e) {

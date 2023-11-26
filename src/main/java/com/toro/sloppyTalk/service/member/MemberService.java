@@ -18,4 +18,7 @@ public interface MemberService {
     Long follow(Long memberId, Long targetId);
 
     List<Friend> findFriends(Long memberId);
+
+
+
 }

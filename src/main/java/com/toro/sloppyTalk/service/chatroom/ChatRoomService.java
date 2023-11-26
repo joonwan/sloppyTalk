@@ -13,6 +13,9 @@ public interface ChatRoomService {
 
     ChatRoom findChatRoom(Long chatRoomId);
 
-
     ExistDto alreadyExist(Long memberId, Long friendId);
+
+    List<ChatRoom> findChatRoomByMemberId(Long memberId);
+
+    Member getFriend(long chatRoomId, Long memberId);
 }

@@ -15,8 +15,10 @@ spring:
 logging:
   level:
     org.hibernate.sql: trace
+#    root: debug
+#    com.toro : debug
 server:
-  address: 192.168.45.23
+  address: 192.168.45.55
   port: 8080
 
 

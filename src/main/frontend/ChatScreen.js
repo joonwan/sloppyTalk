@@ -7,7 +7,10 @@ import axios from "axios";
 
 const ChatScreen = ({ route }) => {
     const { friendName, friendId, memberId, chatRoomId } = route.params;
-
+    console.log("friend id = " + friendId);
+    console.log("friend name = " + friendName);
+    console.log("memberId = " + memberId);
+    console.log("chatRoom Id = " + chatRoomId);
     const [text, onChangeText] = useState("");
     const [messages, setMessages] = useState([]);
     const stompClient = useRef(null);
@@ -29,7 +32,6 @@ const ChatScreen = ({ route }) => {
                     setMessages(response.data.messageDataList);
                     nextId.current = response.data.startId;
 
-
                 }
             ).catch(
                 e => console.log("axios error : " + e)
@@ -38,7 +40,11 @@ const ChatScreen = ({ route }) => {
             const sock = new SockJS(`http://${IP_ADDRESS}:8080/sloppy-gate`);
             stompClient.current = Stomp.over(sock);
 
-            stompClient.current.connect({}, frame => {
+            stompClient.current.connect({
+                memberId : memberId,
+                screenName : "CHAT_SCREEN",
+                chatRoomId : chatRoomId
+            }, frame => {
                 console.log("Connected: " + frame);
 
                 stompClient.current.subscribe(

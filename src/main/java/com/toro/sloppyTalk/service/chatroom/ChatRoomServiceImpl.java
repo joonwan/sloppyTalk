@@ -4,11 +4,9 @@ import com.toro.sloppyTalk.Repository.chatroom.ChatRoomRepository;
 import com.toro.sloppyTalk.Repository.chatroom.ExistDto;
 import com.toro.sloppyTalk.Repository.chatroom.MemberChatRoomRepository;
 import com.toro.sloppyTalk.Repository.member.MemberRepository;
-import com.toro.sloppyTalk.Repository.message.MessageRepository;
 import com.toro.sloppyTalk.domain.ChatRoom;
 import com.toro.sloppyTalk.domain.Member;
 import com.toro.sloppyTalk.domain.MemberChatRoom;
-import com.toro.sloppyTalk.domain.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +52,16 @@ public class ChatRoomServiceImpl implements ChatRoomService{
     @Override
     public ExistDto alreadyExist(Long memberId, Long friendId){
         return memberChatRoomRepository.alreadyExist(memberId, friendId);
+    }
+
+    @Override
+    public List<ChatRoom> findChatRoomByMemberId(Long memberId){
+        return memberChatRoomRepository.findMemberChatRooms(memberId);
+    }
+
+    @Override
+    public Member getFriend(long chatRoomId, Long memberId){
+        return memberChatRoomRepository.getFriend(chatRoomId, memberId);
     }
 
 }

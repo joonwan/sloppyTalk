@@ -1,8 +1,11 @@
 import {Button, FlatList, SafeAreaView, StyleSheet, Text, View} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import IP_ADDRESS from "./Const";
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
+import { ALERT_TYPE, Dialog, AlertNotificationRoot, Toast } from 'react-native-alert-notification';
 
 async function getSessionId(){
     return await AsyncStorage.getItem("sessionId");
@@ -13,9 +16,9 @@ async function getSessionId(){
 const FriendsScreen = ({route,navigation}) =>{
     const [chatRoomId, setChatRoomId] = useState(null);
     const [data, setData] = useState([]);
+    const stompClient = useRef(null);
     const idParam = route.params;
     const memberId = idParam.memberId;
-
     async function createChatRoom(memberId, friendId, friendName) {
         console.log("memberId : " + memberId+ ", friendId : " + friendId);
         await axios.post(`http://${IP_ADDRESS}:8080/chatroom/new`,
@@ -30,6 +33,7 @@ const FriendsScreen = ({route,navigation}) =>{
         ).then(value => {
 
             const chatRoomId = value.data.chatRoomId;
+            console.log(typeof memberId);
             navigation.navigate("ChatScreen", {
                 friendName: friendName,
                 friendId: friendId,
@@ -62,6 +66,44 @@ const FriendsScreen = ({route,navigation}) =>{
 
             }
         );
+
+        const connect = () => {
+
+            const sock = new SockJS(`http://${IP_ADDRESS}:8080/alert`);
+            stompClient.current = Stomp.over(sock);
+
+            stompClient.current.connect({
+                memberId : memberId,
+                screenName : "OTHER_SCREEN",
+            }, frame => {
+                console.log("Connected: " + frame);
+
+                stompClient.current.subscribe(
+                    `/private_alert/${memberId}`,
+                    (message) => {
+                        // const json = JSON.parse(message.body);
+                        alert(JSON.stringify(message.body));
+                        // Toast.show({
+                        //     type: ALERT_TYPE.SUCCESS,
+                        //     title: 'Success',
+                        //     textBody: 'Congrats! this is toast notification success',
+                        // })
+
+                    }
+                );
+            }, error => {
+                console.log("Error: " + error);
+            });
+        };
+
+        connect();
+
+        return () => {
+            // Disconnect WebSocket when the component is unmounted
+            if (stompClient.current && stompClient.current.connected) {
+                stompClient.current.disconnect();
+            }
+        };
 
     },[]);
     useEffect(() => {},[chatRoomId]);

@@ -24,4 +24,11 @@ public class MessageRepositoryImpl implements MessageRepository{
                 .setParameter("chatRoomId", chatRoomId)
                 .getResultList();
     }
+
+    @Override
+    public String findLastMessage(Long chatRoomId){
+        return em.createQuery("select  m.content from Message m where m.chatRoom.id = :chatRoomId and m.createDateTime = (select max(m2.createDateTime) from Message m2 where m.chatRoom = m2.chatRoom)", String.class)
+                .setParameter("chatRoomId", chatRoomId)
+                .getSingleResult();
+    }
 }

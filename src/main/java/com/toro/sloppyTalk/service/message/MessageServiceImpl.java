@@ -53,4 +53,11 @@ public class MessageServiceImpl implements MessageService{
     public List<Message> findMessageByChatRoomId(Long chatRoomId){
         return messageRepository.findMessages(chatRoomId);
     }
+
+    @Override
+    public String getLastMessage(Long chatRoomId){
+        return messageRepository.findLastMessage(chatRoomId);
+    }
+
+
 }

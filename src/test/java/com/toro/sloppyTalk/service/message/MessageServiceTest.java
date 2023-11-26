@@ -78,6 +78,62 @@ class MessageServiceTest {
         List<Message> messages = messageService.findMessageByChatRoomId(chatRoomId);
         Assertions.assertThat(messages.size()).isEqualTo(2);
 
+        //last message test
+
+        em.flush();
+        em.clear();
+
+        List<Object[]> resultList =em.createQuery("select m.content, m.member.name from Message m where m.id = (select max(m2.id) from Message m2)")
+                .getResultList();
+
+        for(Object[] row : resultList){
+            System.out.println("row = " + row[0]);
+            System.out.println("row = " + row[1]);
+        }
 
     }
+
+    @Test
+    public void test3() throws Exception {
+        //given
+        Member member1 = new Member("test1","test1","test1");
+        Member member2 = new Member("test2","test2","test2");
+
+        Long member1Id = memberService.save(member1);
+        Long member2Id = memberService.save(member2);
+
+        memberService.save(member1);
+        memberService.save(member2);
+
+        em.flush();
+        em.clear();
+
+        List<Long> participantIdList = Arrays.asList(member1Id, member2Id);
+
+        Long chatRoomId = chatRoomService.createChatRoom(participantIdList);
+
+        em.flush();
+        em.clear();
+
+        ChatRoom chatRoom = chatRoomService.findChatRoom(chatRoomId);
+
+        //when
+        Message message1 = new Message(chatRoom,member1,"new Test Message1",LocalDateTime.now());
+        Message message2 = new Message(chatRoom,member1,"new Test Message2",LocalDateTime.now());
+
+        em.persist(message1);
+        em.persist(message2);
+        //when
+
+        String name = em.createQuery("select mcr.member.name from MemberChatRoom mcr where chatRoom.id = :chatRoomId and mcr.member.id <> :memberId", String.class)
+                .setParameter("chatRoomId", chatRoomId)
+                .setParameter("memberId", member1Id)
+                .getSingleResult();
+
+        System.out.println("name = " + name);
+
+        //then
+    }
+
+
 }

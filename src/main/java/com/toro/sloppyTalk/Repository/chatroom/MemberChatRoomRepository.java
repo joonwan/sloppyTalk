@@ -1,5 +1,7 @@
 package com.toro.sloppyTalk.Repository.chatroom;
 
+import com.toro.sloppyTalk.domain.ChatRoom;
+import com.toro.sloppyTalk.domain.Member;
 import com.toro.sloppyTalk.domain.MemberChatRoom;
 
 import java.util.List;
@@ -10,7 +12,9 @@ public interface MemberChatRoomRepository {
 
     MemberChatRoom findById(Long memberChatRoomId);
 
-    List<MemberChatRoom> findMemberChatRooms(Long memberId);
+    List<ChatRoom> findMemberChatRooms(Long memberId);
 
     ExistDto alreadyExist(Long memberId, Long friendId);
+
+    Member getFriend(Long chatRoomId, Long memberId);
 }

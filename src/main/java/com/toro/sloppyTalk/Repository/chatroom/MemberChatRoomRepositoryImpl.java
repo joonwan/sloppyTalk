@@ -1,5 +1,7 @@
 package com.toro.sloppyTalk.Repository.chatroom;
 
+import com.toro.sloppyTalk.domain.ChatRoom;
+import com.toro.sloppyTalk.domain.Member;
 import com.toro.sloppyTalk.domain.MemberChatRoom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,8 +27,8 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository{
     }
 
     @Override
-    public List<MemberChatRoom> findMemberChatRooms(Long memberId){
-        return em.createQuery("select mcr from MemberChatRoom mcr where mcr.member.id = :memberrId", MemberChatRoom.class)
+    public List<ChatRoom> findMemberChatRooms(Long memberId){
+        return em.createQuery("select mcr.chatRoom from MemberChatRoom mcr where mcr.member.id = :memberId", ChatRoom.class)
                 .setParameter("memberId", memberId)
                 .getResultList();
     }
@@ -45,6 +47,16 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository{
         }
 
         return new ExistDto(null,false);
+
+    }
+
+    @Override
+    public Member getFriend(Long chatRoomId, Long memberId){
+
+        return em.createQuery("select mcr.member from MemberChatRoom mcr where mcr.chatRoom.id = :chatRoomId and mcr.member.id != :memberId", Member.class)
+                .setParameter("chatRoomId",chatRoomId)
+                .setParameter("memberId",memberId)
+                .getSingleResult();
 
     }
 }

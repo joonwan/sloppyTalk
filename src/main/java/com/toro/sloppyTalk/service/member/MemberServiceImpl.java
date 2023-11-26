@@ -77,4 +77,6 @@ public class MemberServiceImpl implements MemberService{
         Member member = memberRepository.findById(memberId);
         return friendRepository.findFriends(member);
     }
+
+
 }

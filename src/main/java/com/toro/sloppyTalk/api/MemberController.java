@@ -1,14 +1,18 @@
 package com.toro.sloppyTalk.api;
 
+import com.toro.sloppyTalk.domain.ChatRoom;
 import com.toro.sloppyTalk.domain.Friend;
 import com.toro.sloppyTalk.domain.Member;
 import com.toro.sloppyTalk.login.SessionManagerImpl;
+import com.toro.sloppyTalk.service.chatroom.ChatRoomService;
 import com.toro.sloppyTalk.service.member.MemberService;
+import com.toro.sloppyTalk.service.message.MessageService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,14 +24,14 @@ public class MemberController {
 
     private final MemberService memberService;
     private final SessionManagerImpl sessionManager;
+    private final ChatRoomService chatRoomService;
+    private final MessageService messageService;
 
 
     @PostMapping("/new")
     public void join(@RequestBody RegisterDto param){
-
         Member member = getMember(param);
         memberService.save(member);
-
     }
 
     @GetMapping("/{sessionId}")
@@ -50,10 +54,24 @@ public class MemberController {
     public List<FriendsResponseDto> getFriends(@PathVariable String sessionId){
         Long memberId = sessionManager.getMemberId(sessionId);
         List<Friend> friends = memberService.findFriends(memberId);
-
         return friends.stream().map(FriendsResponseDto::new).collect(Collectors.toList());
     }
 
+    @GetMapping("/{memberId}/chatroom")
+    public List<MemberChatRoomsDto> getChatRooms(@PathVariable Long memberId){
+        List<ChatRoom> chatRooms = chatRoomService.findChatRoomByMemberId(memberId);
+        List<MemberChatRoomsDto> result = new ArrayList<>();
+        for (ChatRoom chatRoom : chatRooms) {
+            Long chatRoomId = chatRoom.getId();
+
+            String lastContent = messageService.getLastMessage(chatRoomId);
+            Member friend = chatRoomService.getFriend(chatRoomId, memberId);
+            MemberChatRoomsDto dto = new MemberChatRoomsDto(chatRoomId, lastContent, friend.getId(), friend.getName());
+            result.add(dto);
+        }
+
+        return result;
+    }
 
     private static Member getMember(RegisterDto param) {
         String name = param.getName();
@@ -105,6 +123,21 @@ public class MemberController {
 
         public FollowRequestDto(Long targetId) {
             this.targetId = targetId;
+        }
+    }
+
+    @Data
+    static class MemberChatRoomsDto{
+        private Long chatRoomId;
+        private String content;
+        private Long friendId;
+        private String friendName;
+
+        public MemberChatRoomsDto(Long chatRoomId, String content, Long friendId, String friendName) {
+            this.chatRoomId = chatRoomId;
+            this.content = content;
+            this.friendId = friendId;
+            this.friendName = friendName;
         }
     }
 }
